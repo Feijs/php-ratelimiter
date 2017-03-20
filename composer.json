@@ -10,13 +10,16 @@
         }
     ],
     "require": {
-        "php": ">=5.5",
-        "desarrolla2/cache": "~2.0"
+        "php": ">=5.5"
     },
     "require-dev": {
         "mockery/mockery": "^0.9.4",
         "phpunit/phpunit": "^4.7.6",
         "scrutinizer/ocular": "^1.1"
+    },
+    "suggested": {
+        "myonlinestore/php-ratelimiter-desarrolla": "Use Desarolla2 as caching service",
+        "myonlinestore/php-ratelimiter-stash": "Use Stash as caching service"
     },
     "autoload": {
         "psr-4": {

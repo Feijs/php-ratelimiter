@@ -3,15 +3,13 @@
 namespace Sunspikes\Tests\Functional;
 
 use Mockery as M;
-use Sunspikes\Ratelimit\Cache\Adapter\DesarrollaCacheAdapter;
-use Sunspikes\Ratelimit\Cache\Factory\FactoryInterface;
 use Sunspikes\Ratelimit\RateLimiter;
 use Sunspikes\Ratelimit\Throttle\Factory\TimeAwareThrottlerFactory;
 use Sunspikes\Ratelimit\Throttle\Hydrator\HydratorFactory;
 use Sunspikes\Ratelimit\Throttle\Settings\MovingWindowSettings;
 use Sunspikes\Ratelimit\Time\TimeAdapterInterface;
 
-class MovingWindowTest extends AbstractThrottlerTestCase
+abstract class AbstractMovingWindowTest extends AbstractThrottlerTestCase
 {
     const TIME_LIMIT = 24;
 
@@ -63,10 +61,10 @@ class MovingWindowTest extends AbstractThrottlerTestCase
     /**
      * @inheritdoc
      */
-    protected function createRatelimiter(FactoryInterface $cacheFactory)
+    protected function createRatelimiter()
     {
         return new RateLimiter(
-            new TimeAwareThrottlerFactory(new DesarrollaCacheAdapter($cacheFactory->make()), $this->timeAdapter),
+            new TimeAwareThrottlerFactory($this->createCacheAdapter(), $this->timeAdapter),
             new HydratorFactory(),
             new MovingWindowSettings($this->getMaxAttempts(), self::TIME_LIMIT)
         );

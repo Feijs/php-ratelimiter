@@ -3,19 +3,17 @@
 namespace Sunspikes\Tests\Functional;
 
 use Mockery as M;
-use Sunspikes\Ratelimit\Cache\Adapter\DesarrollaCacheAdapter;
-use Sunspikes\Ratelimit\Cache\Factory\FactoryInterface;
 use Sunspikes\Ratelimit\RateLimiter;
 use Sunspikes\Ratelimit\Throttle\Factory\TimeAwareThrottlerFactory;
 use Sunspikes\Ratelimit\Throttle\Hydrator\HydratorFactory;
-use Sunspikes\Ratelimit\Throttle\Settings\LeakyBucketSettings;
+use Sunspikes\Ratelimit\Throttle\Settings\FixedWindowSettings;
+use Sunspikes\Ratelimit\Throttle\Settings\RetrialQueueSettings;
 use Sunspikes\Ratelimit\Throttle\Throttler\ThrottlerInterface;
 use Sunspikes\Ratelimit\Time\TimeAdapterInterface;
 
-class LeakyBucketTest extends AbstractThrottlerTestCase
+abstract class AbstractRetrialQueueTest extends AbstractThrottlerTestCase
 {
-    const TIME_LIMIT = 27000;
-    const TOKEN_LIMIT = 30;    //30 requests per 27 seconds
+    const TIME_LIMIT = 24;
 
     /**
      * @var TimeAdapterInterface|M\MockInterface
@@ -35,10 +33,12 @@ class LeakyBucketTest extends AbstractThrottlerTestCase
 
     public function testThrottleAccess()
     {
-        $expectedWaitTime = self::TIME_LIMIT / (self::TOKEN_LIMIT - $this->getMaxAttempts());
         $this->timeAdapter->shouldReceive('usleep')
-            ->with(ThrottlerInterface::SECOND_TO_MILLISECOND_MULTIPLIER * $expectedWaitTime)
-            ->once();
+            ->with(
+                ThrottlerInterface::SECOND_TO_MILLISECOND_MULTIPLIER *
+                ThrottlerInterface::MILLISECOND_TO_MICROSECOND_MULTIPLIER *
+                self::TIME_LIMIT
+            )->once();
 
         parent::testThrottleAccess();
     }
@@ -46,12 +46,12 @@ class LeakyBucketTest extends AbstractThrottlerTestCase
     /**
      * @inheritdoc
      */
-    protected function createRatelimiter(FactoryInterface $cacheFactory)
+    protected function createRatelimiter()
     {
         return new RateLimiter(
-            new TimeAwareThrottlerFactory(new DesarrollaCacheAdapter($cacheFactory->make()), $this->timeAdapter),
+            new TimeAwareThrottlerFactory($this->createCacheAdapter(), $this->timeAdapter),
             new HydratorFactory(),
-            new LeakyBucketSettings(self::TOKEN_LIMIT, self::TIME_LIMIT, $this->getMaxAttempts())
+            new RetrialQueueSettings(new FixedWindowSettings($this->getMaxAttempts(), self::TIME_LIMIT))
         );
     }
 }

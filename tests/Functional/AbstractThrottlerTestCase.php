@@ -3,8 +3,7 @@
 namespace Sunspikes\Tests\Functional;
 
 use Mockery as M;
-use Sunspikes\Ratelimit\Cache\Factory\DesarrollaCacheFactory;
-use Sunspikes\Ratelimit\Cache\Factory\FactoryInterface;
+use Sunspikes\Ratelimit\Cache\Adapter\CacheAdapterInterface;
 use Sunspikes\Ratelimit\RateLimiter;
 
 abstract class AbstractThrottlerTestCase extends \PHPUnit_Framework_TestCase
@@ -19,12 +18,7 @@ abstract class AbstractThrottlerTestCase extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $cacheFactory = new DesarrollaCacheFactory(null, [
-            'driver' => 'memory',
-            'memory' => ['limit' => 10],
-        ]);
-
-        $this->ratelimiter = $this->createRatelimiter($cacheFactory);
+        $this->ratelimiter = $this->createRatelimiter();
     }
 
     public function testThrottlePreLimit()
@@ -89,9 +83,12 @@ abstract class AbstractThrottlerTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param FactoryInterface $cacheFactory
-     *
      * @return RateLimiter
      */
-    abstract protected function createRatelimiter(FactoryInterface $cacheFactory);
+    abstract protected function createRatelimiter();
+
+    /**
+     * @return CacheAdapterInterface
+     */
+    abstract protected function createCacheAdapter();
 }
