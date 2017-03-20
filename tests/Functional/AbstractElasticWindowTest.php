@@ -1,6 +1,6 @@
 <?php
 
-namespace Sunspikes\Tests\Functional;
+namespace Sunspikes\Tests\Ratelimit\Functional;
 
 use Sunspikes\Ratelimit\RateLimiter;
 use Sunspikes\Ratelimit\Throttle\Factory\ThrottlerFactory;

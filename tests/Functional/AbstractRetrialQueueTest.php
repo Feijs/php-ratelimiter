@@ -1,6 +1,6 @@
 <?php
 
-namespace Sunspikes\Tests\Functional;
+namespace Sunspikes\Tests\Ratelimit\Functional;
 
 use Mockery as M;
 use Sunspikes\Ratelimit\RateLimiter;
